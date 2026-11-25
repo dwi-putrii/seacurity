@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seacurity — Menjelajah Keamanan Siber di Lautan Digital</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            abyss: '#F8FBFF',
+            deepsea: '#FFFFFF',
+            ocean: '#E0F2FE',
+            biolum: '#0284C7',
+            tealglow: '#0369A1',
+            coral: '#E11D48',
+            kelp: '#059669',
+          },
+          keyframes: {
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseSonar: {
+              '0%': { transform: 'scale(0.95)', opacity: '0.7' },
+              '70%': { transform: 'scale(1.4)', opacity: '0' },
+              '100%': { transform: 'scale(1.4)', opacity: '0' },
+            }
+          },
+          animation: {
+            'float-slow': 'floatSlow 6s ease-in-out infinite',
+            'pulse-sonar': 'pulseSonar 2.8s cubic-bezier(0.24, 0, 0.38, 1) infinite',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- YouTube IFrame Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <style>
+    body {
+      background-color: #f8fbff;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+
+    #oceanCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ocean-glass {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(224, 242, 254, 0.82));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(2, 132, 199, 0.18);
+    }
+
+    .glow-cyan {
+      box-shadow: 0 12px 32px rgba(2, 132, 199, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f0f9ff;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(2, 132, 199, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(2, 132, 199, 0.52);
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-sky-200 selection:text-sky-950">
+  <canvas id="oceanCanvas"><\/canvas>
+
+  <div id="appToast" class="fixed bottom-5 right-5 z-[90] hidden max-w-sm px-4 py-3 rounded-2xl ocean-glass border border-biolum/40 text-xs sm:text-sm text-slate-900 shadow-xl items-center gap-2.5">
+    <i data-lucide="sparkles" class="w-4 h-4 text-biolum shrink-0"><\/i>
+    <span id="appToastText"><\/span>
+  </div>
+
+  <div id="gatepassModal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-md">
+    <div class="ocean-glass w-full max-w-md rounded-3xl p-6 sm:p-8 border border-biolum/35 glow-cyan space-y-6">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-biolum to-tealglow flex items-center justify-center text-white font-extrabold">
+            <i data-lucide="compass" class="w-6 h-6"><\/i>
+          </div>
+          <div>
+            <span class="text-[11px] font-mono font-bold text-biolum uppercase tracking-wider">GERBANG SAMUDRA<\/span>
+            <h2 class="font-display font-bold text-xl text-slate-900">Masuk Sebagai Petualang<\/h2>
+          </div>
+        </div>
+        <button type="button" id="closeGatepassBtn" onclick="closeGatepassModal()" aria-label="Tutup Gerbang" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-sky-100 transition">
+          <i data-lucide="x" class="w-5 h-5"><\/i>
+        <\/button>
+      </div>
+
+      <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+        Sebelum berlayar menjelajah keamanan digital, masukkan nama panggilan Petualang agar tersimpan di Profil kamu.
+      <\/p>
+
+      <form id="gatepassForm" class="space-y-4">
+        <div>
+          <label for="gatepassNicknameInput" class="block text-xs font-mono font-bold text-biolum uppercase mb-1.5">
+            Nama Panggilan Petualang
+          <\/label>
+          <input
+            type="text"
+            id="gatepassNicknameInput"
+            required
+            maxlength="24"
+            placeholder="Contoh: Dwi, Putri, Natalia"
+            class="w-full px-4 py-3 rounded-2xl bg-white border border-sky-200 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-biolum"
+          />
+          <p id="gatepassErrorMsg" class="hidden text-xs text-coral mt-1.5">Masukkan nama panggilan minimal 2 huruf.<\/p>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-sm shadow-lg shadow-sky-600/20 hover:brightness-110 transition flex items-center justify-center gap-2">
+          <span>Buka Gerbang & Simpan Profil<\/span>
+          <i data-lucide="arrow-right" class="w-4 h-4"><\/i>
+        <\/button>
+      <\/form>
+    <\/div>
+  <\/div>
+
+  <div id="searchModal" class="fixed inset-0 z-[70] hidden items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-900/45 backdrop-blur-md">
+    <div class="ocean-glass w-full max-w-2xl rounded-3xl border border-biolum/35 glow-cyan overflow-hidden">
+      <div class="p-4 border-b border-sky-200/80 flex items-center gap-3">
+        <i data-lucide="search" class="w-5 h-5 text-biolum shrink-0"><\/i>
+        <input
+          type="text"
+          id="globalSearchInput"
+          placeholder="Cari materi pelajaran, istilah kamus, atau ancaman siber..."
+          class="w-full bg-transparent text-slate-900 text-sm sm:text-base placeholder-slate-400 focus:outline-none"
+        />
+        <button type="button" id="closeSearchModalBtn" onclick="closeSearchModal()" class="px-2.5 py-1 rounded-lg bg-white border border-sky-200 text-[11px] font-mono text-slate-600 hover:text-slate-900">
+          ESC
+        <\/button>
+      <\/div>
+      <div id="globalSearchResults" class="max-h-80 overflow-y-auto p-3 space-y-1.5"><\/div>
+    <\/div>
+  <\/div>
+
+  <div id="threatModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4 bg-slate-900/45 backdrop-blur-md">
+    <div class="ocean-glass w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-biolum/35 glow-cyan max-h-[90vh] overflow-y-auto space-y-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span id="threatModalCat" class="inline-block px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-coral text-xs font-mono font-bold uppercase mb-2"><\/span>
+          <h3 id="threatModalTitle" class="font-display font-bold text-2xl text-slate-900"><\/h3>
+        <\/div>
+        <button type="button" onclick="closeThreatModal()" class="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-sky-100 transition">
+          <i data-lucide="x" class="w-5 h-5"><\/i>
+        <\/button>
+      <\/div>
+
+      <p id="threatModalSummary" class="text-sm text-slate-700 leading-relaxed"><\/p>
+
+      <div id="threatModalVideoWrap" class="hidden rounded-2xl overflow-hidden border border-sky-200 bg-sky-950 aspect-video">
+        <iframe
+          id="threatModalIframe"
+          class="w-full h-full"
+          title="Video Penjelasan Ancaman"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ><\/iframe>
+      <\/div>
+
+      <div class="p-4 rounded-2xl bg-white/90 border border-sky-200 space-y-1.5">
+        <h4 class="text-xs font-mono font-bold text-biolum uppercase">CARA KERJA SERANGAN<\/h4>
+        <p id="threatModalMechanism" class="text-xs sm:text-sm text-slate-700 leading-relaxed"><\/p>
+      <\/div>
+
+      <div class="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 space-y-1.5">
+        <h4 class="text-xs font-mono font-bold text-kelp uppercase">LANGKAH PERLINDUNGAN<\/h4>
+        <ul id="threatModalMitigation" class="list-disc list-inside text-xs sm:text-sm text-slate-700 space-y-1"><\/ul>
+      <\/div>
+    <\/div>
+  <\/div>
+
+  <header class="sticky top-0 z-40 ocean-glass border-b border-sky-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <button type="button" onclick="navigateTo('beranda')" class="flex items-center gap-3 text-left group shrink-0">
+        <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-biolum to-tealglow flex items-center justify-center text-white font-extrabold shadow-lg shadow-sky-600/20 group-hover:scale-105 transition">
+          <i data-lucide="shield-check" class="w-5 h-5"><\/i>
+        <\/div>
+        <div>
+          <span class="font-display font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 block leading-none">
+            Sea<span class="text-biolum">curity<\/span>
+          <\/span>
+          <span class="text-[11px] font-mono text-sky-700/85 hidden sm:block mt-0.5">
+            SAMUDRA KEAMANAN SIBER
+          <\/span>
+        <\/div>
+      <\/button>
+
+      <nav aria-label="Navigasi Utama" class="hidden lg:flex items-center gap-1 xl:gap-1.5">
+        <button type="button" data-nav="beranda" onclick="navigateTo('beranda')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-biolum bg-sky-100 transition">Peta Laut<\/button>
+        <button type="button" data-nav="kurikulum" onclick="navigateTo('kurikulum')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Materi<\/button>
+        <button type="button" data-nav="ancaman" onclick="navigateTo('ancaman')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Ancaman<\/button>
+        <button type="button" data-nav="lab" onclick="navigateTo('lab')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Simulator<\/button>
+        <button type="button" data-nav="teka-teki" onclick="navigateTo('teka-teki')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Ruang Teka-Teki<\/button>
+        <button type="button" data-nav="misi" onclick="navigateTo('misi')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Misi Harian<\/button>
+        <button type="button" data-nav="ujian" onclick="navigateTo('ujian')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Ujian Laut<\/button>
+        <button type="button" data-nav="penebak-sandi" onclick="navigateTo('penebak-sandi')" class="nav-link px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-sky-50 transition">Penebak Sandi<\/button>
+      <\/nav>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          id="openSearchBtn"
+          onclick="openSearchModal()"
+          class="px-3 py-2 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-xs font-medium text-slate-700 hover:text-biolum transition flex items-center gap-2"
+          title="Cari Materi (Tekan '/')"
+        >
+          <i data-lucide="search" class="w-4 h-4 text-biolum"><\/i>
+          <span class="hidden sm:inline">Cari Materi<\/span>
+          <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-sky-50 text-slate-500">/<\/kbd>
+        <\/button>
+
+        <button
+          type="button"
+          id="mobileMenuBtn"
+          onclick="toggleMobileMenu()"
+          aria-label="Buka Menu Navigasi"
+          class="lg:hidden p-2.5 rounded-xl bg-white border border-sky-200 text-slate-700 hover:text-biolum transition"
+        >
+          <i data-lucide="menu" class="w-5 h-5"><\/i>
+        <\/button>
+
+        <button
+          type="button"
+          id="headerProfileBtn"
+          data-nav="hub"
+          onclick="openProfileHub('profil')"
+          class="nav-link pl-2 pr-3 py-1.5 rounded-2xl bg-white hover:bg-sky-50 border border-sky-200 text-xs font-semibold text-slate-800 hover:border-biolum transition flex items-center gap-2"
+        >
+          <span class="w-7 h-7 rounded-full bg-sky-50 border border-biolum/35 flex items-center justify-center text-biolum shrink-0">
+            <i data-lucide="user" class="w-4 h-4"><\/i>
+          <\/span>
+          <span id="headerPetualangName" class="max-w-[96px] truncate">Profil<\/span>
+        <\/button>
+      <\/div>
+    <\/div>
+
+    <div id="mobileMenu" class="hidden lg:hidden border-t border-sky-200 bg-white/95 backdrop-blur-lg px-4 py-3 space-y-1">
+      <button type="button" data-mobilenav="beranda" onclick="navigateTo('beranda'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Peta Laut<\/button>
+      <button type="button" data-mobilenav="kurikulum" onclick="navigateTo('kurikulum'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Materi<\/button>
+      <button type="button" data-mobilenav="ancaman" onclick="navigateTo('ancaman'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Ancaman<\/button>
+      <button type="button" data-mobilenav="lab" onclick="navigateTo('lab'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Simulator<\/button>
+      <button type="button" data-mobilenav="teka-teki" onclick="navigateTo('teka-teki'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Ruang Teka-Teki<\/button>
+      <button type="button" data-mobilenav="misi" onclick="navigateTo('misi'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Misi Harian<\/button>
+      <button type="button" data-mobilenav="ujian" onclick="navigateTo('ujian'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Ujian Laut<\/button>
+      <button type="button" data-mobilenav="penebak-sandi" onclick="navigateTo('penebak-sandi'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-800 hover:bg-sky-50">Penebak Sandi<\/button>
+      <button type="button" data-mobilenav="hub" onclick="openProfileHub('profil'); closeMobileMenu();" class="mobile-nav-item w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-800 hover:bg-sky-50">Profil, Jurnal, Kamus & Lencana<\/button>
+    <\/div>
+  <\/header>
+
+  <main class="relative z-10">
+    <section id="page-beranda" class="page-view min-h-[calc(100vh-5rem)] py-10 sm:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
+        <div class="grid lg:grid-cols-12 gap-10 items-center">
+          <div class="lg:col-span-7 space-y-6">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full ocean-glass border border-biolum/30 text-xs font-mono text-biolum">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-biolum opacity-75"><\/span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-biolum"><\/span>
+              <\/span>
+              <span>RADAR SAMUDRA DIGITAL AKTIF<\/span>
+            <\/div>
+
+            <h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-slate-900">
+              Arungi Keamanan Siber di
+              <span class="bg-gradient-to-r from-biolum via-sky-500 to-tealglow bg-clip-text text-transparent">
+                Lautan Digital
+              <\/span>
+            <\/h1>
+
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-2xl">
+              Pelajari pertahanan akun, kenali jebakan phishing, tonton video penjelasan langsung di halaman, dan uji ketajamanmu lewat simulator serta ruang teka-teki samudra.
+            <\/p>
+
+            <div class="flex flex-wrap items-center gap-3.5 pt-1">
+              <button type="button" onclick="navigateTo('kurikulum')" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-sm shadow-lg shadow-sky-600/20 hover:brightness-110 transition flex items-center gap-2">
+                <span>Mulai Pelayaran<\/span>
+                <i data-lucide="compass" class="w-4 h-4"><\/i>
+              <\/button>
+              <button type="button" onclick="navigateTo('lab')" class="px-6 py-3.5 rounded-2xl ocean-glass hover:border-biolum/50 text-slate-800 font-semibold text-sm transition flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-4 h-4 text-biolum"><\/i>
+                <span>Buka Simulator<\/span>
+              <\/button>
+            <\/div>
+          <\/div>
+
+          <div class="lg:col-span-5">
+            <div class="ocean-glass rounded-3xl p-6 sm:p-8 border border-biolum/30 glow-cyan space-y-6 animate-float-slow">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-biolum/35 flex items-center justify-center text-biolum">
+                    <i data-lucide="user" class="w-6 h-6"><\/i>
+                  <\/div>
+                  <div>
+                    <p class="text-[11px] font-mono text-slate-500 uppercase">PETUALANG AKTIF<\/p>
+                    <h2 id="homePetualangName" class="font-display font-bold text-xl text-slate-900">Tamu Laut<\/h2>
+                  <\/div>
+                <\/div>
+                <button type="button" onclick="openGatepassModal(true)" class="px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 border border-biolum/30 text-xs font-mono font-bold text-biolum transition">
+                  Gerbang
+                <\/button>
+              <\/div>
+
+              <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="p-3.5 rounded-2xl bg-white/90 border border-sky-200">
+                  <p id="homeCompletedCount" class="font-display font-extrabold text-xl text-biolum">0<\/p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Materi Selesai<\/p>
+                <\/div>
+                <div class="p-3.5 rounded-2xl bg-white/90 border border-sky-200">
+                  <p id="homeXpCount" class="font-display font-extrabold text-xl text-tealglow">0<\/p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">XP Samudra<\/p>
+                <\/div>
+                <div class="p-3.5 rounded-2xl bg-white/90 border border-sky-200">
+                  <p id="homeBadgeCount" class="font-display font-extrabold text-xl text-kelp">0<\/p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Lencana<\/p>
+                <\/div>
+              <\/div>
+
+              <div class="p-4 rounded-2xl bg-white/85 border border-sky-200 flex items-center justify-between gap-3">
+                <div class="space-y-0.5">
+                  <p class="text-xs font-mono font-bold text-biolum uppercase">SONAR KEAMANAN<\/p>
+                  <p class="text-xs text-slate-600">Pantau celah tautan, sandi, & privasi sebelum bertindak.<\/p>
+                <\/div>
+                <div class="relative w-11 h-11 rounded-full bg-sky-100 border border-biolum/40 flex items-center justify-center text-biolum shrink-0">
+                  <span class="animate-pulse-sonar absolute inset-0 rounded-full border border-biolum/50"><\/span>
+                  <i data-lucide="radar" class="w-5 h-5"><\/i>
+                <\/div>
+              <\/div>
+            <\/div>
+          <\/div>
+        <\/div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div onclick="navigateTo('kurikulum')" class="ocean-glass rounded-2xl p-5 border border-sky-200 hover:border-biolum/60 transition cursor-pointer space-y-2">
+            <i data-lucide="book-open" class="w-6 h-6 text-biolum"><\/i>
+            <h3 class="font-display font-bold text-lg text-slate-900">Materi & Video<\/h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Materi terstruktur lengkap dengan pemutar video YouTube langsung di halaman.<\/p>
+          <\/div>
+          <div onclick="navigateTo('teka-teki')" class="ocean-glass rounded-2xl p-5 border border-sky-200 hover:border-biolum/60 transition cursor-pointer space-y-2">
+            <i data-lucide="door-open" class="w-6 h-6 text-tealglow"><\/i>
+            <h3 class="font-display font-bold text-lg text-slate-900">Ruang Teka-Teki<\/h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Pecahkan kode dan misteri keamanan di ruangan kapal selam untuk meraih XP.<\/p>
+          <\/div>
+          <div onclick="navigateTo('misi')" class="ocean-glass rounded-2xl p-5 border border-sky-200 hover:border-biolum/60 transition cursor-pointer space-y-2">
+            <i data-lucide="flame" class="w-6 h-6 text-coral"><\/i>
+            <h3 class="font-display font-bold text-lg text-slate-900">Misi Harian<\/h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Selesaikan tantangan harian singkat agar kebiasaan aman tetap terjaga.<\/p>
+          <\/div>
+          <div onclick="openProfileHub('profil')" class="ocean-glass rounded-2xl p-5 border border-sky-200 hover:border-biolum/60 transition cursor-pointer space-y-2">
+            <i data-lucide="user-check" class="w-6 h-6 text-kelp"><\/i>
+            <h3 class="font-display font-bold text-lg text-slate-900">Profil, Jurnal & Kamus<\/h3>
+            <p class="text-xs text-slate-600 leading-relaxed">Kelola identitas Petualang, catatan jurnal, kamus istilah, dan koleksi lencana.<\/p>
+          <\/div>
+        <\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-kurikulum" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="curriculumOverview" class="space-y-8">
+          <div class="space-y-2">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase tracking-wider">
+              PETA PEMBELAJARAN BERTAHAP
+            <\/span>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+              Materi <span class="text-biolum">Keamanan Siber<\/span>
+            <\/h1>
+            <p class="text-slate-600 text-sm max-w-2xl">
+              Pilih materi untuk membaca penjelasan lengkap dan memutar video edukasi YouTube langsung di dalam ruang baca.
+            <\/p>
+          <\/div>
+          <div id="chaptersContainer" class="space-y-8"><\/div>
+        <\/div>
+
+        <div id="lessonReaderWorkspace" class="hidden space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <button type="button" onclick="backToCurriculumOverview()" class="px-4 py-2 rounded-xl ocean-glass hover:border-biolum/50 text-xs font-semibold text-slate-800 transition flex items-center gap-2">
+              <i data-lucide="arrow-left" class="w-4 h-4 text-biolum"><\/i>
+              <span>Kembali ke Daftar Materi<\/span>
+            <\/button>
+            <span id="readerChapterBadge" class="px-3 py-1 rounded-full bg-sky-100 border border-biolum/30 text-xs font-mono text-biolum"><\/span>
+          <\/div>
+
+          <div class="grid lg:grid-cols-12 gap-7 items-start">
+            <aside class="lg:col-span-4 ocean-glass rounded-3xl p-5 border border-sky-200 space-y-4 lg:sticky lg:top-24">
+              <h2 id="readerLessonTitle" class="font-display font-bold text-xl text-slate-900"><\/h2>
+              <p id="readerLessonMeta" class="text-xs font-mono text-slate-500"><\/p>
+              <nav id="readerTocList" class="space-y-1.5 pt-2 border-t border-sky-200"><\/nav>
+            <\/aside>
+
+            <div class="lg:col-span-8 space-y-6">
+              <div class="ocean-glass rounded-3xl p-4 sm:p-6 border border-biolum/30 glow-cyan space-y-4">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-mono font-bold text-biolum uppercase flex items-center gap-1.5">
+                    <i data-lucide="play-circle" class="w-4 h-4"><\/i>
+                    <span>VIDEO MATERI YOUTUBE<\/span>
+                  <\/span>
+                  <div class="flex items-center gap-3 max-w-[68%]">
+                    <span id="readerVideoTitle" class="text-xs text-slate-600 truncate"><\/span>
+                    <a
+                      id="readerYoutubeExternalLink"
+                      href="https://www.youtube.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-[11px] font-mono text-biolum hover:underline shrink-0"
+                    >
+                      Buka di YouTube ↗
+                    <\/a>
+                  <\/div>
+                <\/div>
+
+                <div class="relative rounded-2xl overflow-hidden bg-sky-950 border border-sky-200 aspect-video">
+                  <div id="readerYoutubePlayer" class="w-full h-full"><\/div>
+                <\/div>
+
+                <div id="readerVideoHelperBar" class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl bg-white/85 border border-sky-200 text-[11px] sm:text-xs text-slate-700">
+                  <span id="readerVideoStatusNote">Thumbnail awal aktif. Pilih putar di YouTube atau coba embed di halaman.<\/span>
+                  <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleReaderEmbedMode()" class="font-mono text-biolum hover:underline">
+                      Ganti Mode Pemutar
+                    <\/button>
+                  <\/div>
+                <\/div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      id="readerMarkCompleteBtn"
+                      onclick="toggleCurrentReaderLessonComplete()"
+                      class="px-4 py-2 rounded-xl bg-sky-100 hover:bg-sky-200/80 border border-biolum/40 text-biolum font-bold text-xs transition flex items-center gap-2"
+                    >
+                      <i data-lucide="check-circle-2" class="w-4 h-4"><\/i>
+                      <span id="readerMarkCompleteLabel">Tandai Selesai<\/span>
+                    <\/button>
+
+                    <button
+                      type="button"
+                      onclick="reloadActiveYoutubeVideo()"
+                      class="px-3.5 py-2 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-xs font-semibold text-slate-700 hover:text-biolum transition flex items-center gap-1.5"
+                    >
+                      <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-biolum"><\/i>
+                      <span>Muat Ulang Video<\/span>
+                    <\/button>
+                  <\/div>
+
+                  <button
+                    type="button"
+                    onclick="bookmarkLessonToNotes()"
+                    class="px-4 py-2 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-xs font-semibold text-sky-800 hover:text-biolum transition flex items-center gap-2"
+                  >
+                    <i data-lucide="bookmark-plus" class="w-4 h-4 text-biolum"><\/i>
+                    <span>Simpan ke Jurnal<\/span>
+                  <\/button>
+                <\/div>
+              <\/div>
+
+              <article class="ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+                <div id="readerSectionsContainer" class="space-y-6"><\/div>
+
+                <div class="p-4 sm:p-5 rounded-2xl bg-sky-100/80 border border-biolum/30 space-y-1">
+                  <p class="text-xs font-mono font-bold text-tealglow uppercase">INTISARI MATERI<\/p>
+                  <p id="readerKeyTakeaway" class="text-xs sm:text-sm text-slate-800 leading-relaxed"><\/p>
+                <\/div>
+
+                <div class="pt-4 border-t border-sky-200 flex items-center justify-between gap-3">
+                  <button type="button" id="readerPrevLessonBtn" onclick="stepReaderLesson(-1)" class="px-4 py-2.5 rounded-xl bg-white border border-sky-200 text-xs font-semibold text-slate-700 hover:text-slate-900 transition">
+                    Sebelumnya
+                  <\/button>
+                  <button type="button" id="readerNextLessonBtn" onclick="stepReaderLesson(1)" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-xs transition">
+                    Selesai & Lanjut
+                  <\/button>
+                <\/div>
+              <\/article>
+            <\/div>
+          <\/div>
+        <\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-ancaman" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="space-y-2">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-coral text-xs font-mono font-bold uppercase">
+              KATALOG RISIKO SAMUDRA
+            <\/span>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+              Ensiklopedia <span class="text-biolum">Ancaman Siber<\/span>
+            <\/h1>
+          <\/div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-cat="all" onclick="filterThreats('all')" class="threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-biolum text-white transition">Semua<\/button>
+            <button type="button" data-cat="manipulasi" onclick="filterThreats('manipulasi')" class="threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold ocean-glass text-slate-700 hover:text-slate-900 transition">Manipulasi<\/button>
+            <button type="button" data-cat="perangkat" onclick="filterThreats('perangkat')" class="threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold ocean-glass text-slate-700 hover:text-slate-900 transition">Perangkat & Jaringan<\/button>
+            <button type="button" data-cat="data" onclick="filterThreats('data')" class="threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold ocean-glass text-slate-700 hover:text-slate-900 transition">Data & AI<\/button>
+          <\/div>
+        <\/div>
+        <div id="threatsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"><\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-lab" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div class="space-y-2">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+              LABORATORIUM PRAKTIK
+            <\/span>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+              Simulator <span class="text-biolum">Pertahanan Siber<\/span>
+            <\/h1>
+          <\/div>
+          <div class="inline-flex p-1.5 rounded-2xl ocean-glass gap-1.5">
+            <button type="button" id="tabBtnPassword" onclick="switchLabTab('password')" class="px-4 py-2 rounded-xl text-xs font-bold bg-biolum text-white transition">Kata Sandi<\/button>
+            <button type="button" id="tabBtnPhishing" onclick="switchLabTab('phishing')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Deteksi Phishing<\/button>
+          <\/div>
+        <\/div>
+
+        <div id="labPanelPassword" class="ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6 max-w-3xl mx-auto">
+          <div class="relative">
+            <input type="password" id="passwordInput" placeholder="Ketik kata sandi uji coba..." class="w-full pl-4 pr-12 py-3.5 rounded-2xl bg-white border border-sky-200 text-slate-900 font-mono text-sm focus:outline-none focus:border-biolum" />
+            <button type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" aria-label="Tampilkan Kata Sandi" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-500 hover:text-biolum">
+              <i data-lucide="eye" class="w-5 h-5"><\/i>
+            <\/button>
+          <\/div>
+
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-500">Kekuatan: <strong id="passwordStrengthLabel" class="text-coral">Kosong<\/strong><\/span>
+            <span class="text-slate-500">Estimasi retas: <strong id="passwordCrackTime" class="text-biolum">-<\/strong><\/span>
+          <\/div>
+
+          <div class="w-full h-2.5 rounded-full bg-sky-100 overflow-hidden">
+            <div id="passwordMeterBar" class="h-full w-0 bg-coral transition-all duration-300"><\/div>
+          <\/div>
+
+          <ul id="passwordCriteriaList" class="space-y-2 text-xs text-slate-700"><\/ul>
+        <\/div>
+
+        <div id="labPanelPhishing" class="hidden ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div class="flex items-center justify-between text-xs font-mono text-biolum">
+            <span>KASUS <span id="phishingCaseNum">1<\/span> / <span id="phishingCaseTotal">3<\/span><\/span>
+            <span>SKOR: <strong id="phishingScoreText">0<\/strong><\/span>
+          <\/div>
+          <div id="phishingCaseCard" class="p-5 rounded-2xl bg-white/90 border border-sky-200 space-y-3"><\/div>
+          <div class="flex flex-wrap gap-3">
+            <button type="button" onclick="evaluatePhishingChoice(true)" class="px-5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-coral font-bold text-xs transition">Tandai Phishing (Bahaya)<\/button>
+            <button type="button" onclick="evaluatePhishingChoice(false)" class="px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-kelp font-bold text-xs transition">Tandai Pesan Aman<\/button>
+            <button type="button" onclick="nextPhishingCase()" class="ml-auto px-4 py-2.5 rounded-xl ocean-glass hover:border-biolum/50 text-xs font-semibold text-slate-800 transition">Kasus Berikutnya<\/button>
+          <\/div>
+          <p id="phishingFeedbackText" class="hidden text-xs sm:text-sm p-4 rounded-2xl bg-white/90 border border-sky-200 text-slate-800"><\/p>
+        <\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-teka-teki" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="space-y-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+            MISI PEMECAHAN KODE
+          <\/span>
+          <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+            Ruang <span class="text-biolum">Teka-Teki<\/span> Kapal Selam
+          <\/h1>
+          <p class="text-slate-600 text-sm">Jawab tantangan logika keamanan untuk membuka segel ruangan dan menambah XP Petualang.<\/p>
+        <\/div>
+        <div id="escapeRoomsGrid" class="grid md:grid-cols-2 gap-6"><\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-misi" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="space-y-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+            RUTINITAS KEAMANAN
+          <\/span>
+          <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+            Misi <span class="text-biolum">Harian<\/span> Petualang
+          <\/h1>
+        <\/div>
+        <div id="dailyMissionsList" class="space-y-4"><\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-ujian" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="space-y-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+            EVALUASI PEMAHAMAN
+          <\/span>
+          <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+            Ujian <span class="text-biolum">Laut<\/span>
+          <\/h1>
+        <\/div>
+
+        <div class="ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div class="flex items-center justify-between text-xs font-mono text-biolum">
+            <span>SOAL <span id="quizIndexText">1<\/span> / <span id="quizTotalText">4<\/span><\/span>
+            <span>SKOR: <strong id="quizScoreText">0<\/strong><\/span>
+          <\/div>
+          <h2 id="quizQuestionText" class="font-display font-bold text-xl text-slate-900"><\/h2>
+          <div id="quizOptionsList" class="space-y-3"><\/div>
+          <p id="quizExplanationText" class="hidden text-xs sm:text-sm p-4 rounded-2xl bg-white/90 border border-sky-200 text-slate-800"><\/p>
+          <div class="flex justify-end">
+            <button type="button" id="nextQuizBtn" onclick="nextQuizQuestion()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-xs transition">Soal Berikutnya<\/button>
+          <\/div>
+        <\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-penebak-sandi" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="space-y-2">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+            TANTANGAN DEKRIPSI SAMUDRA
+          <\/span>
+          <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+            Penebak <span class="text-biolum">Sandi<\/span> Rahasia
+          <\/h1>
+          <p class="text-slate-600 text-sm">
+            Tebak kata sandi brankas kapal selam maksimal 5 kali percobaan untuk membuka akses dan meraih XP tambahan.
+          <\/p>
+        <\/div>
+
+        <div class="ocean-glass rounded-3xl p-6 sm:p-8 border border-biolum/25 glow-cyan space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+            <span class="text-biolum">PERCOBAAN: <strong id="passwordGuessAttempts">0<\/strong> / 5<\/span>
+            <span id="passwordGuessStatusBadge" class="px-3 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum font-bold">TERKUNCI<\/span>
+          <\/div>
+
+          <div class="space-y-2">
+            <p class="text-xs font-mono text-slate-500 uppercase">POLA SANDI<\/p>
+            <div id="secretPasswordSlots" class="flex flex-wrap gap-2"><\/div>
+          <\/div>
+
+          <div class="p-4 rounded-2xl bg-white/85 border border-sky-200 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-mono font-bold text-tealglow uppercase">BANTUAN / CLUE SANDI<\/span>
+              <span id="passwordClueCounter" class="text-[11px] font-mono text-slate-500">0 / 4 Clue Terbuka<\/span>
+            <\/div>
+            <ul id="passwordClueList" class="space-y-1.5 text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <li class="text-slate-500 italic">Belum ada clue di awal permainan. Coba tebak dulu, lalu tiap tebakan salah akan membuka clue bertahap!<\/li>
+            <\/ul>
+          <\/div>
+
+          <form id="secretPasswordForm" class="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              id="secretPasswordInput"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Ketik tebakan kata sandi di sini..."
+              class="flex-1 px-4 py-3.5 rounded-2xl bg-white border border-sky-200 text-slate-900 font-mono text-sm placeholder-slate-400 focus:outline-none focus:border-biolum"
+            />
+            <button type="submit" id="secretPasswordSubmitBtn" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-sm hover:brightness-110 transition shrink-0">Tebak Sandi<\/button>
+          <\/form>
+
+          <div id="passwordGuessFeedback" class="hidden p-4 rounded-2xl bg-white/90 border border-sky-200 text-xs sm:text-sm text-slate-800"><\/div>
+
+          <div class="space-y-2 pt-2 border-t border-sky-200">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-mono font-bold text-slate-500 uppercase">RIWAYAT TEBAKAN (MAKS. 5 KALI)<\/span>
+              <button type="button" onclick="resetSecretPasswordGame()" class="text-xs font-mono text-biolum hover:underline">Ulangi Permainan<\/button>
+            <\/div>
+            <div id="passwordGuessHistory" class="flex flex-wrap gap-2">
+              <span class="text-xs text-slate-400">Belum ada tebakan yang dikirim.<\/span>
+            <\/div>
+          <\/div>
+        <\/div>
+      <\/div>
+    <\/section>
+
+    <section id="page-hub" class="page-view hidden min-h-[calc(100vh-5rem)] py-10 sm:py-14">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <span class="inline-block px-3.5 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum text-xs font-mono font-bold uppercase">
+              PUSAT KENDALI PETUALANG
+            <\/span>
+            <h1 class="font-display font-bold text-3xl sm:text-4xl text-slate-900">
+              Profil & <span class="text-biolum">Catatan Samudra<\/span>
+            <\/h1>
+          <\/div>
+
+          <div class="inline-flex flex-nowrap overflow-x-auto max-w-full p-1.5 rounded-2xl ocean-glass gap-1.5 shrink-0">
+            <button type="button" id="hubTabProfil" onclick="switchHubTab('profil')" class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold bg-biolum text-white transition">Profil<\/button>
+            <button type="button" id="hubTabJurnal" onclick="switchHubTab('jurnal')" class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Jurnal<\/button>
+            <button type="button" id="hubTabKamus" onclick="switchHubTab('kamus')" class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Kamus Istilah<\/button>
+            <button type="button" id="hubTabLencana" onclick="switchHubTab('lencana')" class="whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Lencana<\/button>
+          <\/div>
+        <\/div>
+
+        <div id="hubPanelProfil" class="ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-sky-200">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-sky-50 border border-biolum/40 flex items-center justify-center text-biolum">
+                <i data-lucide="user" class="w-8 h-8"><\/i>
+              <\/div>
+              <div>
+                <p class="text-xs font-mono text-biolum uppercase">IDENTITAS PETUALANG<\/p>
+                <h2 id="hubProfileNickname" class="font-display font-bold text-2xl text-slate-900">Tamu Laut<\/h2>
+                <p class="text-xs text-slate-500">Nama panggilan diatur melalui Gerbang Petualang.<\/p>
+              <\/div>
+            <\/div>
+            <button type="button" onclick="openGatepassModal(true)" class="px-4 py-2.5 rounded-xl bg-sky-100 hover:bg-sky-200/80 border border-biolum/40 text-biolum font-bold text-xs transition self-start sm:self-auto">
+              Ubah Nama di Gerbang
+            <\/button>
+          <\/div>
+
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="p-4 rounded-2xl bg-white/90 border border-sky-200">
+              <p class="text-xs text-slate-500">Materi Selesai<\/p>
+              <p id="hubCompletedCount" class="font-display font-extrabold text-2xl text-biolum mt-1">0<\/p>
+            <\/div>
+            <div class="p-4 rounded-2xl bg-white/90 border border-sky-200">
+              <p class="text-xs text-slate-500">Total XP<\/p>
+              <p id="hubXpCount" class="font-display font-extrabold text-2xl text-tealglow mt-1">0<\/p>
+            <\/div>
+            <div class="p-4 rounded-2xl bg-white/90 border border-sky-200">
+              <p class="text-xs text-slate-500">Lencana Terbuka<\/p>
+              <p id="hubBadgeCount" class="font-display font-extrabold text-2xl text-kelp mt-1">0<\/p>
+            <\/div>
+          <\/div>
+        <\/div>
+
+        <div id="hubPanelJurnal" class="hidden ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-slate-900">Jurnal Catatan Keamanan<\/h2>
+            <p class="text-xs sm:text-sm text-slate-600">Simpan catatan pelajaran atau temuan keamanan siber milikmu.<\/p>
+          <\/div>
+
+          <form id="journalNoteForm" class="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              id="journalNoteInput"
+              placeholder="Tulis catatan keamanan baru..."
+              class="flex-1 px-4 py-3 rounded-2xl bg-white border border-sky-200 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-biolum"
+            />
+            <button type="submit" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-sm hover:brightness-110 transition">Tambah Catatan<\/button>
+          <\/form>
+          <div id="journalNotesList" class="space-y-3"><\/div>
+        <\/div>
+
+        <div id="hubPanelKamus" class="hidden ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-slate-900">Kamus Istilah Keamanan Siber<\/h2>
+            <p class="text-xs sm:text-sm text-slate-600">Referensi cepat istilah penting selama menjelajah samudra digital.<\/p>
+          <\/div>
+          <div id="glossaryList" class="grid md:grid-cols-2 gap-4"><\/div>
+        <\/div>
+
+        <div id="hubPanelLencana" class="hidden ocean-glass rounded-3xl p-6 sm:p-8 border border-sky-200 space-y-6">
+          <div>
+            <h2 class="font-display font-bold text-2xl text-slate-900">Koleksi Lencana Petualang<\/h2>
+            <p class="text-xs sm:text-sm text-slate-600">Lencana terbuka otomatis saat menyelesaikan materi, misi, teka-teki, atau menebak sandi.<\/p>
+          <\/div>
+          <div id="badgesGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"><\/div>
+        <\/div>
+      <\/div>
+    <\/section>
+  <\/main>
+
+  <footer class="relative z-10 border-t border-sky-200 bg-white/85 backdrop-blur-md py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <p>Seacurity — Platform Edukasi Literasi & Keamanan Siber<\/p>
+      <p class="font-mono text-sky-700">Tetap Waspada • Verifikasi Sebelum Klik<\/p>
+    <\/div>
+  <\/footer>
+
+  <script>
+    const STORAGE_KEY = 'seacurity_final_state_v1';
+    const SECRET_PASSWORD = 'dwiputrii';
+    const MAX_PASSWORD_ATTEMPTS = 5;
+    const PASSWORD_CLUES = [
+      'Clue 1: Kata sandi terdiri dari 9 karakter.',
+      'Clue 2: Sandi ini merujuk pada sebuah nama perempuan.',
+      'Clue 3: Orangnya keren.',
+      'Clue 4: Huruf terakhirnya double.'
+    ];
+
+    const CURRICULUM_CHAPTERS = [
+      {
+        id: 'bab-1',
+        code: 'BAB 01',
+        title: 'Fondasi Navigasi & Keamanan Akun',
+        lessons: [
+          {
+            id: 'pel-1',
+            title: 'Mengenal Keamanan Siber & Kebiasaan Aman',
+            duration: '12 mnt',
+            xp: 50,
+            youtubeId: 'Dam3631-cQ8',
+            videoTitle: 'Apa Itu Keamanan Siber (Cybersecurity)? (Hobon id)',
+            sections: [
+              {
+                id: 'sec-1-1',
+                heading: 'Mengapa Keamanan Siber Penting dalam Kehidupan Sehari-Hari?',
+                body: 'Setiap hari kita mengandalkan internet untuk belajar, bekerja, bertransaksi keuangan, mengobrol, dan menyimpan arsip penting. Tanpa kesadaran keamanan siber, akun email utama, media sosial, hingga dompet digital bisa menjadi pintu masuk bagi pihak yang tidak bertanggung jawab.',
+                bullets: [
+                  'Akun yang saling terhubung memperbesar dampak bila satu kredensial bocor.',
+                  'Kebiasaan waspada sejak awal jauh lebih ringan dibanding memulihkan akun yang sudah diretas.',
+                  'Keamanan digital melindungi privasi, reputasi, dan ketenangan saat beraktivitas daring.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Seseorang mengabaikan notifikasi login dari perangkat asing di email pribadinya, lalu akun sosial medianya dipakai menyebarkan tautan palsu.'
+              },
+              {
+                id: 'sec-1-2',
+                heading: 'Prinsip Dasar Pertahanan Pribadi di Lautan Digital',
+                body: 'Pertahanan siber yang kuat terdiri dari lapisan kebiasaan: memisahkan kata sandi antar layanan, mengaktifkan autentikasi dua faktor (2FA), serta melakukan pembaruan sistem dan aplikasi secara berkala.',
+                bullets: [
+                  'Gunakan frasa sandi unik untuk setiap akun penting.',
+                  'Aktifkan 2FA pada akun email utama.',
+                  'Perbarui sistem operasi dan browser secara berkala.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Memakai kata sandi berbeda di tiap layanan mencegah kebocoran pada satu situs merambat ke akun utama.'
+              }
+            ],
+            takeaway: 'Pisahkan sandi, aktifkan 2FA, perbarui perangkat, dan biasakan verifikasi sebelum bertindak.'
+          },
+          {
+            id: 'pel-2',
+            title: 'Autentikasi Ganda (2FA) & Sandi Kuat',
+            duration: '10 mnt',
+            xp: 60,
+            youtubeId: 'VcPcvj7DCXU',
+            videoTitle: 'Fitur 2FA (Two Factor Authentication) (BaTii Kemenkeu)',
+            sections: [
+              {
+                id: 'sec-2-1',
+                heading: 'Mengapa Kata Sandi Saja Belum Cukup?',
+                body: 'Kata sandi bisa ditebak atau ikut tersebar akibat kebocoran data layanan lain. Dengan Two-Factor Authentication (2FA), penyerang tetap terhalang meskipun mengetahui kata sandi utama.',
+                bullets: [
+                  'Hindari pola sandi yang mudah ditebak atau dipakai ulang.',
+                  '2FA memberi lapisan verifikasi tambahan setelah sandi.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Login dari perangkat tak dikenal tertahan karena tidak memiliki kode verifikasi kedua.'
+              }
+            ],
+            takeaway: 'Kombinasikan frasa sandi unik dengan 2FA serta simpan kode cadangan dengan aman.'
+          }
+        ]
+      },
+      {
+        id: 'bab-2',
+        code: 'BAB 02',
+        title: 'Menghindari Jebakan Phishing & Rekayasa Sosial',
+        lessons: [
+          {
+            id: 'pel-3',
+            title: 'Mengenali Ciri Serangan Phishing',
+            duration: '11 mnt',
+            xp: 70,
+            youtubeId: 'UygZfswZgRE',
+            videoTitle: 'Apa itu Phising? Ketahui Pengertian, Teknik dan Bahayanya (Halo Edukasi)',
+            sections: [
+              {
+                id: 'sec-3-1',
+                heading: 'Pola Pesan Mendesak, Ancaman & Hadiah Palsu',
+                body: 'Serangan phishing sering meniru pihak resmi dengan nada mendesak, ancaman pemblokiran, atau tawaran hadiah untuk menggiring korban ke halaman palsu.',
+                bullets: [
+                  'Periksa domain utama sebelum memasukkan data login.',
+                  'Jangan pernah membagikan kode OTP atau PIN kepada siapa pun.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Mengecek langsung ke aplikasi resmi membuktikan pesan ancaman pemblokiran akun adalah palsu.'
+              }
+            ],
+            takeaway: 'Selalu periksa domain asli dan jangan bagikan OTP atau PIN.'
+          },
+          {
+            id: 'pel-4',
+            title: 'Menangkal Rekayasa Sosial & Penipuan Darurat',
+            duration: '12 mnt',
+            xp: 75,
+            youtubeId: '3wPRo5nw82U',
+            videoTitle: 'Semua Jenis Cyber Attack Dijelaskan dalam 11 Menit! (Sekilat Info)',
+            sections: [
+              {
+                id: 'sec-4-1',
+                heading: 'Verifikasi Lintas Kanal Sebelum Bertindak',
+                body: 'Rekayasa sosial memanfaatkan empati, kepanikan, atau penyamaran otoritas. Konfirmasikan permintaan sensitif melalui jalur komunikasi resmi yang sudah dikenal.',
+                bullets: [
+                  'Jeda sejenak saat menerima permintaan darurat atau transfer.',
+                  'Hubungi kontak resmi terverifikasi untuk memastikan kebenarannya.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Menghubungi nomor lama yang dikenal memastikan pesan darurat dari nomor baru adalah penipuan.'
+              }
+            ],
+            takeaway: 'Verifikasi lintas kanal membantu menggagalkan penyamaran identitas.'
+          }
+        ]
+      },
+      {
+        id: 'bab-3',
+        code: 'BAB 03',
+        title: 'Keamanan Jaringan, Perangkat & Malware',
+        lessons: [
+          {
+            id: 'pel-5',
+            title: 'Berselancar Aman di Wi-Fi Publik & Jaringan',
+            duration: '11 mnt',
+            xp: 70,
+            youtubeId: 'wrlJ4eEhWew',
+            videoTitle: 'Pencurian Data Bisa dari Wifi? (IDCloudHost)',
+            sections: [
+              {
+                id: 'sec-5-1',
+                heading: 'Risiko Jaringan Terbuka & Hotspot Tiruan',
+                body: 'Jaringan Wi-Fi publik memiliki risiko keamanan lebih tinggi dibanding jaringan pribadi. Hindari transaksi sensitif atau login akun penting saat memakai Wi-Fi terbuka.',
+                bullets: [
+                  'Gunakan jaringan pribadi atau VPN tepercaya untuk aktivitas sensitif.',
+                  'Perhatikan peringatan sertifikat keamanan browser.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Menggunakan hotspot seluler pribadi saat mengakses layanan keuangan di tempat umum.'
+              }
+            ],
+            takeaway: 'Hindari aktivitas sensitif di Wi-Fi terbuka dan gunakan koneksi tepercaya.'
+          },
+          {
+            id: 'pel-6',
+            title: 'Mengenali Malware, Ransomware & Pencurian Data',
+            duration: '13 mnt',
+            xp: 80,
+            youtubeId: '7GUyo0_u_K8',
+            videoTitle: 'Setiap Malware/Virus Dijelaskan Dalam 10 Menit (Sekilat Info)',
+            sections: [
+              {
+                id: 'sec-6-1',
+                heading: 'Unduhan Resmi & Cadangan Data Rutin',
+                body: 'Malware dapat menyusup melalui berkas atau aplikasi dari sumber tidak resmi. Lakukan pencadangan data penting secara berkala agar tetap aman dari gangguan.',
+                bullets: [
+                  'Unduh aplikasi hanya dari sumber resmi.',
+                  'Simpan cadangan data penting di lokasi terpisah.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Cadangan data terpisah membantu pemulihan berkas tanpa panik saat perangkat bermasalah.'
+              }
+            ],
+            takeaway: 'Hindari unduhan tidak resmi dan biasakan backup data rutin.'
+          }
+        ]
+      },
+      {
+        id: 'bab-4',
+        code: 'BAB 04',
+        title: 'Privasi Digital, Jejak Data & Etika Siber',
+        lessons: [
+          {
+            id: 'pel-7',
+            title: 'Mengelola Privasi Akun & Jejak Digital',
+            duration: '11 mnt',
+            xp: 75,
+            youtubeId: 'EeKquJpk1Zk',
+            videoTitle: 'Tip Menjaga Keamanan Data di Internet - #TIAFokus (Tech In Asia ID)',
+            sections: [
+              {
+                id: 'sec-7-1',
+                heading: 'Membatasi Paparan Data & Audit Izin Aplikasi',
+                body: 'Setiap unggahan dan izin akses aplikasi membentuk jejak digital. Tinjau pengaturan privasi dan cabut izin aplikasi yang tidak lagi diperlukan.',
+                bullets: [
+                  'Batasi pembagian informasi pribadi sensitif di ruang publik.',
+                  'Audit izin akses aplikasi secara berkala.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Mencabut akses aplikasi lama yang tidak terpakai mengurangi paparan data.'
+              }
+            ],
+            takeaway: 'Kelola jejak digital dan tinjau izin aplikasi secara rutin.'
+          },
+          {
+            id: 'pel-8',
+            title: 'Verifikasi Informasi Daring & Etika Berkomunikasi',
+            duration: '10 mnt',
+            xp: 80,
+            youtubeId: 'iuQ6lICWFJY',
+            videoTitle: 'Panduan Lengkap Cyber Security & Keamanan Jaringan (Be Why Shine)',
+            sections: [
+              {
+                id: 'sec-8-1',
+                heading: 'Cek Fakta & Etika Ruang Digital',
+                body: 'Verifikasi sumber informasi sebelum membagikannya, hormati privasi orang lain, dan gunakan fitur pelaporan resmi bila menemukan konten atau tautan berbahaya.',
+                bullets: [
+                  'Periksa sumber utama dan konteks sebelum menyebarkan informasi.',
+                  'Laporkan tautan atau akun penipuan melalui kanal resmi.'
+                ],
+                caseStudy: 'Studi Kasus Singkat: Mengecek tanggal dan sumber resmi mencegah penyebaran informasi lama yang menyesatkan.'
+              }
+            ],
+            takeaway: 'Verifikasi sebelum berbagi dan jaga etika serta privasi bersama.'
+          }
+        ]
+      }
+    ];
+
+    const THREATS_DATA = [
+      {
+        id: 'thr-1',
+        title: 'Phishing & Tautan Tiruan',
+        category: 'manipulasi',
+        severity: 'Tinggi',
+        youtubeId: 'UygZfswZgRE',
+        summary: 'Upaya menipu korban agar menyerahkan kata sandi, OTP, atau data kartu melalui situs atau pesan tiruan.',
+        mechanism: 'Penyerang mengirim pesan berisi tautan dengan domain mirip layanan asli dan memicu rasa terburu-buru.',
+        mitigation: ['Cek nama domain resmi.', 'Jangan bagikan OTP.', 'Aktifkan 2FA.']
+      },
+      {
+        id: 'thr-2',
+        title: 'Wi-Fi Publik Tidak Terenkripsi',
+        category: 'perangkat',
+        severity: 'Sedang',
+        youtubeId: 'wrlJ4eEhWew',
+        summary: 'Risiko penyadapan lalu lintas atau halaman login palsu saat terhubung ke jaringan terbuka.',
+        mechanism: 'Jaringan terbuka dapat disalahgunakan untuk mengarahkan pengguna ke portal palsu.',
+        mitigation: ['Hindari transaksi sensitif di Wi-Fi publik.', 'Gunakan jaringan pribadi atau VPN tepercaya.']
+      },
+      {
+        id: 'thr-3',
+        title: 'Kebocoran Data Pribadi',
+        category: 'data',
+        severity: 'Tinggi',
+        youtubeId: 'Dam3631-cQ8',
+        summary: 'Paparan informasi pribadi yang dapat dimanfaatkan untuk penipuan lanjutan.',
+        mechanism: 'Data pribadi yang terekspos dipakai menyusun pesan penipuan yang meyakinkan.',
+        mitigation: ['Batasi data di formulir tidak jelas.', 'Gunakan sandi berbeda.', 'Pantau aktivitas login.']
+      }
+    ];
+
+    const PHISHING_CASES = [
+      {
+        sender: 'notif-keamanan@bank-aman-verifikasi.xyz',
+        subject: 'DARURAT: Akun Anda Akan Diblokir Dalam 2 Jam!',
+        body: 'Klik tautan berikut dan masukkan PIN serta kode OTP Anda agar rekening tidak dinonaktifkan.',
+        isPhishing: true,
+        explanation: 'Domain .xyz tidak resmi dan meminta PIN/OTP melalui tautan mendesak.'
+      },
+      {
+        sender: 'no-reply@kampus-resmi.ac.id',
+        subject: 'Jadwal Kuliah Semester Genap Telah Terbit',
+        body: 'Silakan cek jadwal melalui portal akademik resmi kampus Anda pada menu Jadwal Kuliah.',
+        isPhishing: false,
+        explanation: 'Informasi resmi yang tidak meminta kredensial.'
+      },
+      {
+        sender: 'undian-hadiah@promo-gratis-100jt.top',
+        subject: 'Selamat! Nomor Anda Menang Saldo Gratis',
+        body: 'Isi formulir data diri dan kode verifikasi yang baru masuk ke ponsel Anda untuk klaim hadiah.',
+        isPhishing: true,
+        explanation: 'Iming-iming hadiah instan disertai permintaan kode verifikasi.'
+      }
+    ];
+
+    const ESCAPE_ROOMS = [
+      {
+        id: 'room-1',
+        roomTitle: 'Ruang 1: Pintu Sandi Kapal',
+        xp: 40,
+        clue: 'Kombinasi kata dan simbol acak sepanjang 12+ karakter lebih kuat daripada nama lahir.',
+        question: 'Mana kata sandi yang paling tahan terhadap tebakan otomatis?',
+        options: ['budi12345', 'Karang#Laut92!Biru', 'qwerty2026'],
+        correctIndex: 1,
+        successMsg: 'Pintu sandi terbuka! Sandi panjang dengan variasi karakter sulit ditebak.'
+      },
+      {
+        id: 'room-2',
+        roomTitle: 'Ruang 2: Periskop Tautan Asing',
+        xp: 50,
+        clue: 'Perhatikan domain utama sebelum garis miring pertama (/).',
+        question: 'Kamu menerima pesan berisi tautan "https://akun-login-aman.com/cek". Apa langkah terbaik?',
+        options: ['Langsung login karena ada awalan https://', 'Buka situs resmi secara mandiri lewat bookmark/browser', 'Teruskan tautan ke teman untuk dicek'],
+        correctIndex: 1,
+        successMsg: 'Periskop aman! Membuka situs resmi secara mandiri mencegah jebakan domain tiruan.'
+      }
+    ];
+
+    const DAILY_MISSIONS = [
+      { id: 'mis-1', title: 'Periksa Keamanan Satu Akun Utama', desc: 'Pastikan akun email atau dompet digitalmu memakai sandi unik dan 2FA.', xp: 35 },
+      { id: 'mis-2', title: 'Audit Tautan Sebelum Mengklik', desc: 'Biasakan mengecek alamat pengirim dan domain tautan sebelum membuka pesan.', xp: 35 },
+      { id: 'mis-3', title: 'Catat Satu Pelajaran ke Jurnal', desc: 'Simpan ringkasan keamanan penting ke tab Jurnal.', xp: 30 }
+    ];
+
+    const QUIZ_QUESTIONS = [
+      {
+        question: 'Apa fungsi utama Two-Factor Authentication (2FA)?',
+        options: ['Mempercepat loading halaman web', 'Menambah lapisan verifikasi kedua selain kata sandi', 'Menghapus riwayat browser otomatis'],
+        correctIndex: 1,
+        explanation: '2FA menambahkan faktor verifikasi kedua sehingga akun lebih terlindungi.'
+      },
+      {
+        question: 'Apa yang sebaiknya dilakukan jika mendapat pesan permintaan kode OTP?',
+        options: ['Memberikannya jika pengirim mengaku dari pihak resmi', 'Menolaknya dan tidak membagikannya kepada siapa pun', 'Membalasnya dengan nomor kartu'],
+        correctIndex: 1,
+        explanation: 'Kode OTP bersifat rahasia dan tidak boleh dibagikan kepada siapa pun.'
+      },
+      {
+        question: 'Mengapa menggunakan kata sandi yang sama di banyak situs berisiko?',
+        options: ['Karena membuat browser lambat', 'Jika satu situs bocor, akun lain ikut terancam', 'Karena situs mengunci akun otomatis'],
+        correctIndex: 1,
+        explanation: 'Kredensial yang bocor dari satu layanan sering diuji pada layanan lain.'
+      },
+      {
+        question: 'Kapan waktu terbaik memperbarui aplikasi dan sistem operasi?',
+        options: ['Hanya saat memori penuh', 'Segera setelah pembaruan keamanan tersedia', 'Tidak perlu diperbarui'],
+        correctIndex: 1,
+        explanation: 'Pembaruan rutin membantu menutup celah keamanan.'
+      }
+    ];
+
+    const GLOSSARY_ITEMS = [
+      { term: 'Phishing', def: 'Teknik penipuan daring menggunakan pesan atau situs palsu menyerupai sumber tepercaya.' },
+      { term: '2FA (Two-Factor Authentication)', def: 'Sistem keamanan berlapis dengan dua faktor verifikasi sebelum memberi akses.' },
+      { term: 'OTP (One-Time Password)', def: 'Kode verifikasi sekali pakai yang berlaku singkat untuk mengonfirmasi akses.' },
+      { term: 'Social Engineering', def: 'Manipulasi psikologis agar pengguna menyerahkan informasi atau melakukan tindakan berisiko.' }
+    ];
+
+    const BADGES_CATALOG = [
+      { id: 'badge-navigator', title: 'Navigator Pemula', desc: 'Menyelesaikan minimal 1 materi di halaman Materi.', check: (st) => st.completedLessons.length >= 1 },
+      { id: 'badge-codebreaker', title: 'Pemecah Sandi Samudra', desc: 'Menyelesaikan tantangan Penebak Sandi rahasia.', check: (st) => Boolean(st.passwordGame && st.passwordGame.solved) }
+    ];
+
+    function createDefaultState() {
+      return {
+        nickname: '',
+        xp: 0,
+        completedLessons: [],
+        solvedRooms: [],
+        completedMissions: [],
+        journalNotes: [{ id: 'note-awal', text: 'Selalu periksa domain tautan dan jangan pernah bagikan kode OTP.', time: 'Catatan Awal' }],
+        passwordGame: { attempts: [], solved: false }
+      };
+    }
+
+    function loadAppState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createDefaultState();
+        const parsed = JSON.parse(raw);
+        const def = createDefaultState();
+        return {
+          ...def,
+          ...parsed,
+          completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
+          solvedRooms: Array.isArray(parsed.solvedRooms) ? parsed.solvedRooms : [],
+          completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
+          journalNotes: Array.isArray(parsed.journalNotes) ? parsed.journalNotes : def.journalNotes,
+          passwordGame: {
+            ...def.passwordGame,
+            ...(parsed.passwordGame || {}),
+            attempts: Array.isArray(parsed.passwordGame && parsed.passwordGame.attempts) ? parsed.passwordGame.attempts : []
+          }
+        };
+      } catch (err) {
+        return createDefaultState();
+      }
+    }
+
+    let appState = loadAppState();
+    function saveAppState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (err) {}
+    }
+
+    function safeRenderIcons() {
+      try {
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      } catch (err) {}
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById('appToast');
+      const textEl = document.getElementById('appToastText');
+      if (!toast || !textEl) return;
+      textEl.textContent = message;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      safeRenderIcons();
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 3000);
+    }
+
+    function awardXp(amount, label) {
+      if (!amount || amount <= 0) return;
+      appState.xp += amount;
+      saveAppState();
+      updateProfileUI();
+      showToast('+' + amount + ' XP — ' + label);
+    }
+
+    function getUnlockedBadgesCount() {
+      return BADGES_CATALOG.filter((b) => b.check(appState)).length;
+    }
+
+    function updateProfileUI() {
+      const displayName = appState.nickname && appState.nickname.trim().length > 0 ? appState.nickname.trim() : 'Tamu Laut';
+      const headerLabel = appState.nickname && appState.nickname.trim().length > 0 ? appState.nickname.trim() : 'Profil';
+      document.getElementById('headerPetualangName').textContent = headerLabel;
+      document.getElementById('homePetualangName').textContent = displayName;
+      document.getElementById('hubProfileNickname').textContent = displayName;
+
+      const completedCount = appState.completedLessons.length;
+      const badgeCount = getUnlockedBadgesCount();
+      ['homeCompletedCount', 'hubCompletedCount'].forEach((id) => { document.getElementById(id).textContent = String(completedCount); });
+      ['homeXpCount', 'hubXpCount'].forEach((id) => { document.getElementById(id).textContent = String(appState.xp); });
+      ['homeBadgeCount', 'hubBadgeCount'].forEach((id) => { document.getElementById(id).textContent = String(badgeCount); });
+      renderBadges();
+    }
+
+    function openGatepassModal(allowClose = false) {
+      const modal = document.getElementById('gatepassModal');
+      const closeBtn = document.getElementById('closeGatepassBtn');
+      const input = document.getElementById('gatepassNicknameInput');
+      const errMsg = document.getElementById('gatepassErrorMsg');
+      if (!modal) return;
+      document.body.style.overflow = 'hidden';
+      if (closeBtn) closeBtn.classList.toggle('hidden', !allowClose);
+      if (errMsg) errMsg.classList.add('hidden');
+      if (input) input.value = appState.nickname || '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      safeRenderIcons();
+      setTimeout(() => input && input.focus(), 40);
+    }
+
+    function closeGatepassModal() {
+      const modal = document.getElementById('gatepassModal');
+      if (!modal) return;
+      document.body.style.overflow = '';
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    document.getElementById('gatepassForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('gatepassNicknameInput');
+      const errMsg = document.getElementById('gatepassErrorMsg');
+      const cleanName = (input ? input.value : '').trim();
+      if (cleanName.length < 2) {
+        if (errMsg) errMsg.classList.remove('hidden');
+        return;
+      }
+      if (errMsg) errMsg.classList.add('hidden');
+      appState.nickname = cleanName;
+      saveAppState();
+      updateProfileUI();
+      closeGatepassModal();
+      showToast('Selamat datang di Gerbang Seacurity, ' + cleanName + '!');
+    });
+
+    let currentPageId = 'beranda';
+    function updateNavHighlight(pageId) {
+      document.querySelectorAll('.nav-link').forEach((btn) => {
+        const isTarget = btn.getAttribute('data-nav') === pageId;
+        btn.classList.toggle('text-biolum', isTarget);
+        btn.classList.toggle('bg-sky-100', isTarget);
+        btn.classList.toggle('font-bold', isTarget);
+        btn.classList.toggle('text-slate-700', !isTarget);
+        btn.classList.toggle('font-semibold', !isTarget);
+      });
+      document.querySelectorAll('.mobile-nav-item').forEach((btn) => {
+        const isTarget = btn.getAttribute('data-mobilenav') === pageId;
+        btn.classList.toggle('text-tealglow', isTarget);
+        btn.classList.toggle('bg-sky-100', isTarget);
+        btn.classList.toggle('font-bold', isTarget);
+        btn.classList.toggle('text-slate-800', !isTarget);
+      });
+    }
+
+    function navigateTo(pageId) {
+      currentPageId = pageId;
+      document.querySelectorAll('.page-view').forEach((sec) => sec.classList.add('hidden'));
+      const targetSec = document.getElementById('page-' + pageId);
+      if (targetSec) targetSec.classList.remove('hidden');
+      else {
+        document.getElementById('page-beranda').classList.remove('hidden');
+        currentPageId = 'beranda';
+      }
+      if (pageId !== 'kurikulum') destroyActiveYoutubePlayer();
+      updateNavHighlight(currentPageId);
+      safeRenderIcons();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('hidden'); }
+    function closeMobileMenu() { document.getElementById('mobileMenu').classList.add('hidden'); }
+    function openProfileHub(tabName = 'profil') { navigateTo('hub'); switchHubTab(tabName); }
+
+    function switchHubTab(tabName) {
+      ['profil', 'jurnal', 'kamus', 'lencana'].forEach((t) => {
+        const btn = document.getElementById('hubTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const panel = document.getElementById('hubPanel' + t.charAt(0).toUpperCase() + t.slice(1));
+        const active = t === tabName;
+        if (btn) {
+          btn.className = active
+            ? 'whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold bg-biolum text-white transition'
+            : 'whitespace-nowrap px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        }
+        if (panel) panel.classList.toggle('hidden', !active);
+      });
+      if (tabName === 'jurnal') renderJournalNotes();
+      if (tabName === 'kamus') renderGlossary();
+      if (tabName === 'lencana') renderBadges();
+      safeRenderIcons();
+    }
+
+    let activeLessonObj = null;
+    let activeChapterObj = null;
+    let forcePreviewPosterCard = true;
+    let readerYtPlayer = null;
+
+    function destroyActiveYoutubePlayer() {
+      if (readerYtPlayer && typeof readerYtPlayer.destroy === 'function') {
+        try { readerYtPlayer.destroy(); } catch (err) {}
+      }
+      readerYtPlayer = null;
+    }
+
+    function renderChaptersOverview() {
+      const container = document.getElementById('chaptersContainer');
+      if (!container) return;
+      container.innerHTML = CURRICULUM_CHAPTERS.map((chap) => {
+        const cardsHtml = chap.lessons.map((les) => {
+          const isDone = appState.completedLessons.includes(les.id);
+          return `
+            <div onclick="openLessonReader('${chap.id}', '${les.id}')" class="ocean-glass rounded-2xl p-5 border ${isDone ? 'border-emerald-300' : 'border-sky-200 hover:border-biolum/60'} transition cursor-pointer flex flex-col justify-between gap-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between gap-2 text-xs font-mono">
+                  <span class="text-biolum">${les.duration} • +${les.xp} XP</span>
+                  ${isDone ? '<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-kelp font-bold">Selesai</span>' : '<span class="text-slate-400">Belum Selesai</span>'}
+                </div>
+                <h3 class="font-display font-bold text-lg text-slate-900">${les.title}</h3>
+                <p class="text-xs text-slate-600 line-clamp-2">${les.sections[0].body}</p>
+              </div>
+              <div class="text-xs font-mono font-bold text-biolum flex items-center gap-1.5">
+                <span>Buka Materi & Video</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-full bg-sky-100 border border-biolum/30 text-xs font-mono font-bold text-biolum">${chap.code}</span>
+              <h2 class="font-display font-bold text-2xl text-slate-900">${chap.title}</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-5">${cardsHtml}</div>
+          </div>
+        `;
+      }).join('');
+      safeRenderIcons();
+    }
+
+    function getFlatLessonsList() {
+      const list = [];
+      CURRICULUM_CHAPTERS.forEach((chap) => chap.lessons.forEach((les) => list.push({ chap, les })));
+      return list;
+    }
+
+    function openLessonReader(chapterId, lessonId) {
+      const chap = CURRICULUM_CHAPTERS.find((c) => c.id === chapterId);
+      const les = chap ? chap.lessons.find((l) => l.id === lessonId) : null;
+      if (!chap || !les) return;
+
+      activeChapterObj = chap;
+      activeLessonObj = les;
+      forcePreviewPosterCard = true;
+
+      document.getElementById('curriculumOverview').classList.add('hidden');
+      document.getElementById('lessonReaderWorkspace').classList.remove('hidden');
+      document.getElementById('readerChapterBadge').textContent = `${chap.code} • ${chap.title}`;
+      document.getElementById('readerLessonTitle').textContent = les.title;
+      document.getElementById('readerLessonMeta').textContent = `Estimasi: ${les.duration} • Hadiah: ${les.xp} XP`;
+      document.getElementById('readerVideoTitle').textContent = les.videoTitle || les.title;
+
+      const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(les.youtubeId)}`;
+      document.getElementById('readerYoutubeExternalLink').href = watchUrl;
+
+      document.getElementById('readerTocList').innerHTML = les.sections.map((sec, idx) => `
+        <a href="#${sec.id}" class="block px-3 py-2 rounded-xl text-xs text-slate-600 hover:text-biolum hover:bg-sky-50 transition">
+          ${idx + 1}. ${sec.heading}
+        </a>
+      `).join('');
+
+      document.getElementById('readerSectionsContainer').innerHTML = les.sections.map((sec) => {
+        const bulletsHtml = Array.isArray(sec.bullets) && sec.bullets.length > 0
+          ? `<ul class="space-y-1.5 pt-1 text-xs sm:text-sm text-slate-700 list-disc list-inside">${sec.bullets.map((b) => `<li>${b}</li>`).join('')}</ul>`
+          : '';
+        const caseHtml = sec.caseStudy
+          ? `<div class="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 leading-relaxed">${sec.caseStudy}</div>`
+          : '';
+        return `
+          <div id="${sec.id}" class="space-y-3 scroll-mt-24 pb-6 border-b border-sky-200/80 last:border-b-0 last:pb-0">
+            <h3 class="font-display font-bold text-xl text-slate-900">${sec.heading}</h3>
+            <p class="text-sm text-slate-700 leading-relaxed">${sec.body}</p>
+            ${bulletsHtml}
+            ${caseHtml}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('readerKeyTakeaway').textContent = les.takeaway;
+      updateReaderCompleteButton();
+      renderReaderVideoSurface(les.youtubeId, watchUrl);
+      safeRenderIcons();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function backToCurriculumOverview() {
+      destroyActiveYoutubePlayer();
+      document.getElementById('lessonReaderWorkspace').classList.add('hidden');
+      document.getElementById('curriculumOverview').classList.remove('hidden');
+      renderChaptersOverview();
+    }
+
+    function updateReaderCompleteButton() {
+      if (!activeLessonObj) return;
+      const isDone = appState.completedLessons.includes(activeLessonObj.id);
+      document.getElementById('readerMarkCompleteLabel').textContent = isDone ? 'Selesai Dipelajari' : 'Tandai Selesai';
+    }
+
+    function toggleCurrentReaderLessonComplete() {
+      if (!activeLessonObj) return;
+      const idx = appState.completedLessons.indexOf(activeLessonObj.id);
+      if (idx === -1) {
+        appState.completedLessons.push(activeLessonObj.id);
+        saveAppState();
+        updateProfileUI();
+        awardXp(activeLessonObj.xp, `Menyelesaikan "${activeLessonObj.title}"`);
+      } else {
+        appState.completedLessons.splice(idx, 1);
+        saveAppState();
+        updateProfileUI();
+        showToast('Status selesai pelajaran dilepas.');
+      }
+      updateReaderCompleteButton();
+      renderChaptersOverview();
+    }
+
+    function bookmarkLessonToNotes() {
+      if (!activeLessonObj) return;
+      appState.journalNotes.unshift({
+        id: `note-${Date.now()}`,
+        text: `[${activeLessonObj.title}] ${activeLessonObj.takeaway}`,
+        time: 'Tersimpan dari Pelajaran'
+      });
+      saveAppState();
+      showToast('Intisari pelajaran disimpan ke Jurnal.');
+    }
+
+    function stepReaderLesson(delta) {
+      if (!activeLessonObj) return;
+      if (delta > 0 && !appState.completedLessons.includes(activeLessonObj.id)) {
+        appState.completedLessons.push(activeLessonObj.id);
+        saveAppState();
+        updateProfileUI();
+        awardXp(activeLessonObj.xp, `Menyelesaikan "${activeLessonObj.title}"`);
+      }
+      const flat = getFlatLessonsList();
+      const curIdx = flat.findIndex((item) => item.les.id === activeLessonObj.id);
+      const nextItem = flat[curIdx + delta];
+      if (nextItem) openLessonReader(nextItem.chap.id, nextItem.les.id);
+      else backToCurriculumOverview();
+    }
+
+    function resetReaderPlayerContainer() {
+      destroyActiveYoutubePlayer();
+      const host = document.getElementById('readerYoutubePlayer');
+      if (host) host.innerHTML = '';
+    }
+
+    function renderReaderVideoSurface(videoId, watchUrl) {
+      resetReaderPlayerContainer();
+      const host = document.getElementById('readerYoutubePlayer');
+      const note = document.getElementById('readerVideoStatusNote');
+      if (!host) return;
+      const thumbUrl = `https://img.youtube.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`;
+
+      if (forcePreviewPosterCard) {
+        if (note) note.textContent = 'Thumbnail awal aktif. Pilih putar di YouTube atau coba embed di halaman.';
+        host.innerHTML = `
+          <div class="relative w-full h-full flex items-center justify-center bg-sky-950">
+            <img src="${thumbUrl}" alt="Thumbnail Video YouTube" onerror="this.src='https://placehold.co/1280x720/E0F2FE/0284C7?text=Video+YouTube'" class="w-full h-full object-cover opacity-55" />
+            <div class="absolute inset-0 bg-gradient-to-t from-sky-950/90 via-sky-950/45 to-transparent flex flex-col items-center justify-center p-4 text-center gap-3">
+              <a href="${watchUrl}" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-biolum to-tealglow text-white font-bold text-xs sm:text-sm shadow-lg flex items-center gap-2 hover:brightness-110 transition">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Putar Video di YouTube</span>
+              </a>
+              <button type="button" onclick="tryEmbedFromDefaultThumbnail()" class="text-xs font-mono text-sky-200 hover:underline">
+                Coba Putar Embed di Halaman
+              </button>
+            </div>
+          </div>
+        `;
+        safeRenderIcons();
+        return;
+      }
+
+      if (note) note.textContent = 'Mode embed aktif. Klik "Muat Ulang Video" untuk kembali ke thumbnail awal.';
+      if (window.YT && typeof window.YT.Player === 'function') {
+        const innerId = `ytDynamicFrame_${Date.now()}`;
+        host.innerHTML = `<div id="${innerId}" class="w-full h-full"></div>`;
+        readerYtPlayer = new window.YT.Player(innerId, {
+          width: '100%',
+          height: '100%',
+          videoId,
+          playerVars: { rel: 0, modestbranding: 1, playsinline: 1 }
+        });
+      } else {
+        host.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?rel=0&modestbranding=1&playsinline=1" title="Pemutar Video Edukasi YouTube" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+      }
+    }
+
+    function tryEmbedFromDefaultThumbnail() {
+      if (!activeLessonObj) return;
+      forcePreviewPosterCard = false;
+      renderReaderVideoSurface(activeLessonObj.youtubeId, `https://www.youtube.com/watch?v=${encodeURIComponent(activeLessonObj.youtubeId)}`);
+    }
+
+    function toggleReaderEmbedMode() {
+      if (!activeLessonObj) return;
+      forcePreviewPosterCard = !forcePreviewPosterCard;
+      renderReaderVideoSurface(activeLessonObj.youtubeId, `https://www.youtube.com/watch?v=${encodeURIComponent(activeLessonObj.youtubeId)}`);
+    }
+
+    function reloadActiveYoutubeVideo() {
+      if (!activeLessonObj) return;
+      forcePreviewPosterCard = true;
+      renderReaderVideoSurface(activeLessonObj.youtubeId, `https://www.youtube.com/watch?v=${encodeURIComponent(activeLessonObj.youtubeId)}`);
+      showToast('Kembali ke thumbnail awal.');
+    }
+
+    let activeThreatFilter = 'all';
+    function filterThreats(cat) {
+      activeThreatFilter = cat;
+      document.querySelectorAll('.threat-filter-btn').forEach((btn) => {
+        const match = btn.getAttribute('data-cat') === cat;
+        btn.className = match
+          ? 'threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-biolum text-white transition'
+          : 'threat-filter-btn px-4 py-2 rounded-xl text-xs font-semibold ocean-glass text-slate-700 hover:text-slate-900 transition';
+      });
+      renderThreatsGrid();
+    }
+
+    function renderThreatsGrid() {
+      const grid = document.getElementById('threatsGrid');
+      if (!grid) return;
+      const list = activeThreatFilter === 'all' ? THREATS_DATA : THREATS_DATA.filter((t) => t.category === activeThreatFilter);
+      grid.innerHTML = list.map((t) => `
+        <div onclick="openThreatModal('${t.id}')" class="ocean-glass rounded-2xl p-6 border border-sky-200 hover:border-biolum/60 transition cursor-pointer flex flex-col justify-between gap-4">
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-biolum uppercase">${t.category}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-coral font-bold">${t.severity}</span>
+            </div>
+            <h3 class="font-display font-bold text-xl text-slate-900">${t.title}</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${t.summary}</p>
+          </div>
+          <span class="text-xs font-mono font-bold text-biolum">Lihat Detail & Pencegahan →</span>
+        </div>
+      `).join('');
+    }
+
+    function openThreatModal(id) {
+      const item = THREATS_DATA.find((t) => t.id === id);
+      if (!item) return;
+      document.getElementById('threatModalCat').textContent = `${item.category} • Risiko ${item.severity}`;
+      document.getElementById('threatModalTitle').textContent = item.title;
+      document.getElementById('threatModalSummary').textContent = item.summary;
+      document.getElementById('threatModalMechanism').textContent = item.mechanism;
+      document.getElementById('threatModalMitigation').innerHTML = item.mitigation.map((m) => `<li>${m}</li>`).join('');
+      const wrap = document.getElementById('threatModalVideoWrap');
+      const iframe = document.getElementById('threatModalIframe');
+      if (wrap && iframe && item.youtubeId) {
+        iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(item.youtubeId)}?rel=0&modestbranding=1`;
+        wrap.classList.remove('hidden');
+      }
+      const modal = document.getElementById('threatModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      safeRenderIcons();
+    }
+
+    function closeThreatModal() {
+      const iframe = document.getElementById('threatModalIframe');
+      if (iframe) iframe.src = '';
+      const modal = document.getElementById('threatModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function switchLabTab(tab) {
+      const isPass = tab === 'password';
+      document.getElementById('tabBtnPassword').className = isPass
+        ? 'px-4 py-2 rounded-xl text-xs font-bold bg-biolum text-white transition'
+        : 'px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+      document.getElementById('tabBtnPhishing').className = !isPass
+        ? 'px-4 py-2 rounded-xl text-xs font-bold bg-biolum text-white transition'
+        : 'px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+      document.getElementById('labPanelPassword').classList.toggle('hidden', !isPass);
+      document.getElementById('labPanelPhishing').classList.toggle('hidden', isPass);
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('passwordInput');
+      if (input) input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function evaluatePasswordStrength() {
+      const input = document.getElementById('passwordInput');
+      const label = document.getElementById('passwordStrengthLabel');
+      const crackEl = document.getElementById('passwordCrackTime');
+      const bar = document.getElementById('passwordMeterBar');
+      const list = document.getElementById('passwordCriteriaList');
+      if (!input || !label || !crackEl || !bar || !list) return;
+
+      const val = input.value || '';
+      const checks = [
+        { ok: val.length >= 10, text: 'Minimal 10 karakter' },
+        { ok: /[A-Z]/.test(val) && /[a-z]/.test(val), text: 'Kombinasi huruf besar & kecil' },
+        { ok: /[0-9]/.test(val), text: 'Mengandung angka' },
+        { ok: /[^A-Za-z0-9]/.test(val), text: 'Mengandung simbol khusus' }
+      ];
+      const score = checks.filter((c) => c.ok).length;
+      const pct = val.length === 0 ? 0 : Math.max(15, score * 25);
+      bar.style.width = `${pct}%`;
+
+      if (val.length === 0) {
+        label.textContent = 'Kosong'; label.className = 'text-coral'; crackEl.textContent = '-'; bar.className = 'h-full bg-coral transition-all duration-300';
+      } else if (score <= 1) {
+        label.textContent = 'Lemah'; label.className = 'text-coral'; crackEl.textContent = 'Hitungan detik – menit'; bar.className = 'h-full bg-coral transition-all duration-300';
+      } else if (score <= 3) {
+        label.textContent = 'Sedang'; label.className = 'text-biolum'; crackEl.textContent = 'Beberapa hari – bulan'; bar.className = 'h-full bg-biolum transition-all duration-300';
+      } else {
+        label.textContent = 'Sangat Kuat'; label.className = 'text-kelp'; crackEl.textContent = 'Puluhan – ratusan tahun'; bar.className = 'h-full bg-kelp transition-all duration-300';
+      }
+
+      list.innerHTML = checks.map((c) => `<li class="flex items-center gap-2 ${c.ok ? 'text-kelp' : 'text-slate-500'}"><span>${c.ok ? '✓' : '•'}</span><span>${c.text}</span></li>`).join('');
+    }
+
+    document.getElementById('passwordInput').addEventListener('input', evaluatePasswordStrength);
+
+    let phishingIdx = 0, phishingScore = 0, phishingAnswered = false;
+    function renderPhishingCase() {
+      const c = PHISHING_CASES[phishingIdx];
+      document.getElementById('phishingCaseNum').textContent = String(phishingIdx + 1);
+      document.getElementById('phishingCaseTotal').textContent = String(PHISHING_CASES.length);
+      document.getElementById('phishingScoreText').textContent = String(phishingScore);
+      document.getElementById('phishingFeedbackText').classList.add('hidden');
+      phishingAnswered = false;
+      document.getElementById('phishingCaseCard').innerHTML = `
+        <p class="text-xs font-mono text-slate-500">Pengirim: <span class="text-biolum">${c.sender}</span></p>
+        <h3 class="font-display font-bold text-lg text-slate-900">${c.subject}</h3>
+        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">${c.body}</p>
+      `;
+    }
+
+    function evaluatePhishingChoice(userMarkedPhishing) {
+      if (phishingAnswered) return;
+      phishingAnswered = true;
+      const c = PHISHING_CASES[phishingIdx];
+      const fb = document.getElementById('phishingFeedbackText');
+      const correct = userMarkedPhishing === c.isPhishing;
+      if (correct) { phishingScore += 25; awardXp(15, 'Analisis Phishing Tepat'); }
+      document.getElementById('phishingScoreText').textContent = String(phishingScore);
+      fb.textContent = `${correct ? 'Tepat!' : 'Kurang tepat.'} ${c.explanation}`;
+      fb.classList.remove('hidden');
+    }
+
+    function nextPhishingCase() {
+      phishingIdx = (phishingIdx + 1) % PHISHING_CASES.length;
+      renderPhishingCase();
+    }
+
+    function renderEscapeRooms() {
+      const grid = document.getElementById('escapeRoomsGrid');
+      if (!grid) return;
+      grid.innerHTML = ESCAPE_ROOMS.map((room) => {
+        const solved = appState.solvedRooms.includes(room.id);
+        return `
+          <div class="ocean-glass rounded-3xl p-6 border ${solved ? 'border-emerald-300' : 'border-sky-200'} space-y-4">
+            <div class="flex items-center justify-between gap-2 text-xs font-mono">
+              <span class="text-biolum font-bold">+${room.xp} XP</span>
+              <span class="px-2.5 py-0.5 rounded-full ${solved ? 'bg-emerald-100 text-kelp' : 'bg-sky-100 text-biolum'} font-bold">${solved ? 'TERBUKA' : 'TERKUNCI'}</span>
+            </div>
+            <h3 class="font-display font-bold text-xl text-slate-900">${room.roomTitle}</h3>
+            <p class="text-xs text-slate-600 bg-white/85 p-3 rounded-xl border border-sky-200">Clue: ${room.clue}</p>
+            <p class="text-sm text-slate-900 font-medium">${room.question}</p>
+            <div class="space-y-2">
+              ${room.options.map((opt, idx) => `<button type="button" onclick="answerEscapeRoom('${room.id}', ${idx})" class="w-full text-left px-4 py-2.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-xs sm:text-sm text-slate-800 hover:border-biolum transition">${opt}</button>`).join('')}
+            </div>
+            <p id="roomFeedback-${room.id}" class="hidden text-xs text-kelp font-medium"></p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function answerEscapeRoom(roomId, optIndex) {
+      const room = ESCAPE_ROOMS.find((r) => r.id === roomId);
+      const fb = document.getElementById(`roomFeedback-${roomId}`);
+      if (!room || !fb) return;
+      if (optIndex === room.correctIndex) {
+        fb.className = 'text-xs text-kelp font-semibold';
+        fb.textContent = room.successMsg;
+        fb.classList.remove('hidden');
+        if (!appState.solvedRooms.includes(room.id)) {
+          appState.solvedRooms.push(room.id);
+          saveAppState();
+          updateProfileUI();
+          awardXp(room.xp, `Membuka ${room.roomTitle}`);
+          renderEscapeRooms();
+        }
+      } else {
+        fb.className = 'text-xs text-coral font-medium';
+        fb.textContent = 'Belum tepat, periksa petunjuk lalu coba lagi.';
+        fb.classList.remove('hidden');
+      }
+    }
+
+    function renderDailyMissions() {
+      const list = document.getElementById('dailyMissionsList');
+      if (!list) return;
+      list.innerHTML = DAILY_MISSIONS.map((m) => {
+        const done = appState.completedMissions.includes(m.id);
+        return `
+          <div class="ocean-glass rounded-2xl p-5 border ${done ? 'border-emerald-300' : 'border-sky-200'} flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <span class="text-xs font-mono text-biolum font-bold">+${m.xp} XP</span>
+              <h3 class="font-display font-bold text-lg text-slate-900">${m.title}</h3>
+              <p class="text-xs sm:text-sm text-slate-600">${m.desc}</p>
+            </div>
+            <button type="button" onclick="toggleMissionDone('${m.id}', ${m.xp})" class="px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 transition ${done ? 'bg-emerald-100 border border-emerald-300 text-kelp' : 'bg-gradient-to-r from-biolum to-tealglow text-white'}">${done ? 'Selesai ✓' : 'Selesaikan Misi'}</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleMissionDone(missionId, xp) {
+      const idx = appState.completedMissions.indexOf(missionId);
+      if (idx === -1) {
+        appState.completedMissions.push(missionId);
+        saveAppState();
+        updateProfileUI();
+        awardXp(xp, 'Misi Harian Selesai');
+      } else {
+        appState.completedMissions.splice(idx, 1);
+        saveAppState();
+        updateProfileUI();
+        showToast('Status misi diperbarui.');
+      }
+      renderDailyMissions();
+    }
+
+    let quizIdx = 0, quizScore = 0, quizAnswered = false;
+    function renderQuizQuestion() {
+      const q = QUIZ_QUESTIONS[quizIdx];
+      document.getElementById('quizIndexText').textContent = String(quizIdx + 1);
+      document.getElementById('quizTotalText').textContent = String(QUIZ_QUESTIONS.length);
+      document.getElementById('quizScoreText').textContent = String(quizScore);
+      document.getElementById('quizQuestionText').textContent = q.question;
+      document.getElementById('quizExplanationText').classList.add('hidden');
+      quizAnswered = false;
+      document.getElementById('quizOptionsList').innerHTML = q.options.map((opt, idx) => `<button type="button" onclick="selectQuizOption(${idx})" class="w-full text-left px-4 py-3 rounded-2xl bg-white hover:bg-sky-50 border border-sky-200 text-sm text-slate-800 hover:border-biolum transition">${opt}</button>`).join('');
+    }
+
+    function selectQuizOption(idx) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      const q = QUIZ_QUESTIONS[quizIdx];
+      const exp = document.getElementById('quizExplanationText');
+      if (idx === q.correctIndex) { quizScore += 25; awardXp(20, 'Jawaban Ujian Laut Benar'); }
+      document.getElementById('quizScoreText').textContent = String(quizScore);
+      exp.textContent = `${idx === q.correctIndex ? 'Benar!' : 'Kurang tepat.'} ${q.explanation}`;
+      exp.classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      quizIdx = (quizIdx + 1) % QUIZ_QUESTIONS.length;
+      renderQuizQuestion();
+    }
+
+    function renderSecretPasswordGame() {
+      const pg = appState.passwordGame;
+      const attemptsEl = document.getElementById('passwordGuessAttempts');
+      const badgeEl = document.getElementById('passwordGuessStatusBadge');
+      const slotsEl = document.getElementById('secretPasswordSlots');
+      const clueCounterEl = document.getElementById('passwordClueCounter');
+      const clueListEl = document.getElementById('passwordClueList');
+      const historyEl = document.getElementById('passwordGuessHistory');
+      const inputEl = document.getElementById('secretPasswordInput');
+      const submitBtn = document.getElementById('secretPasswordSubmitBtn');
+
+      const wrongCount = pg.attempts.filter((a) => a.toLowerCase() !== SECRET_PASSWORD).length;
+      const isExhausted = !pg.solved && pg.attempts.length >= MAX_PASSWORD_ATTEMPTS;
+
+      attemptsEl.textContent = String(pg.attempts.length);
+      if (pg.solved) {
+        badgeEl.textContent = 'TERBUKA';
+        badgeEl.className = 'px-3 py-1 rounded-full bg-emerald-100 border border-emerald-300 text-kelp font-bold';
+      } else if (isExhausted) {
+        badgeEl.textContent = 'PERCOBAAN HABIS';
+        badgeEl.className = 'px-3 py-1 rounded-full bg-rose-100 border border-rose-300 text-coral font-bold';
+      } else {
+        badgeEl.textContent = 'TERKUNCI';
+        badgeEl.className = 'px-3 py-1 rounded-full bg-sky-100 border border-biolum/30 text-biolum font-bold';
+      }
+
+      inputEl.disabled = Boolean(pg.solved || isExhausted);
+      submitBtn.disabled = Boolean(pg.solved || isExhausted);
+
+      slotsEl.innerHTML = SECRET_PASSWORD.split('').map((ch, idx) => `<span class="w-9 h-11 rounded-xl bg-white border ${pg.solved ? 'border-emerald-300 text-kelp' : 'border-sky-200 text-biolum'} font-mono font-bold text-base flex items-center justify-center" title="Huruf ke-${idx + 1}">${pg.solved ? ch : '?'}</span>`).join('');
+
+      const unlockedClues = pg.solved ? PASSWORD_CLUES.length : Math.min(PASSWORD_CLUES.length, wrongCount);
+      clueCounterEl.textContent = `${unlockedClues} / ${PASSWORD_CLUES.length} Clue Terbuka`;
+
+      if (pg.attempts.length === 0 && !pg.solved) {
+        clueListEl.innerHTML = `<li class="text-slate-500 italic">Belum ada clue di awal permainan. Coba tebak dulu, lalu tiap tebakan salah akan membuka clue bertahap!</li>`;
+      } else if (unlockedClues === 0 && !pg.solved) {
+        clueListEl.innerHTML = `<li class="text-slate-500 italic">Belum ada clue terbuka.</li>`;
+      } else {
+        clueListEl.innerHTML = PASSWORD_CLUES.slice(0, unlockedClues).map((c) => `<li class="text-slate-700">${c}</li>`).join('');
+      }
+
+      if (pg.attempts.length === 0) {
+        historyEl.innerHTML = `<span class="text-xs text-slate-400">Belum ada tebakan yang dikirim.</span>`;
+      } else {
+        historyEl.innerHTML = pg.attempts.map((attempt, idx) => {
+          const ok = attempt.toLowerCase() === SECRET_PASSWORD;
+          return `<span class="px-3 py-1 rounded-xl text-xs font-mono border ${ok ? 'bg-emerald-50 border-emerald-300 text-kelp' : 'bg-rose-50 border-rose-200 text-coral'}">#${idx + 1}: ${attempt}</span>`;
+        }).join('');
+      }
+    }
+
+    function resetSecretPasswordGame() {
+      appState.passwordGame = { attempts: [], solved: false };
+      saveAppState();
+      document.getElementById('passwordGuessFeedback').classList.add('hidden');
+      const input = document.getElementById('secretPasswordInput');
+      input.value = '';
+      input.focus();
+      renderSecretPasswordGame();
+      showToast('Permainan Penebak Sandi diulang dari awal.');
+    }
+
+    document.getElementById('secretPasswordForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pg = appState.passwordGame;
+      if (pg.solved || pg.attempts.length >= MAX_PASSWORD_ATTEMPTS) return;
+      const input = document.getElementById('secretPasswordInput');
+      const fb = document.getElementById('passwordGuessFeedback');
+      const guess = (input ? input.value : '').trim();
+      if (!guess) return;
+
+      pg.attempts.push(guess);
+      input.value = '';
+
+      if (guess.toLowerCase() === SECRET_PASSWORD) {
+        const firstTimeSolved = !pg.solved;
+        pg.solved = true;
+        saveAppState();
+        renderSecretPasswordGame();
+        updateProfileUI();
+        fb.className = 'p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs sm:text-sm text-kelp font-semibold';
+        fb.textContent = `Tepat! Kata sandi rahasia "${SECRET_PASSWORD}" berhasil ditebak.`;
+        fb.classList.remove('hidden');
+        if (firstTimeSolved) awardXp(75, 'Berhasil Menebak Sandi Rahasia');
+        return;
+      }
+
+      saveAppState();
+      renderSecretPasswordGame();
+      const wrongCount = pg.attempts.filter((a) => a.toLowerCase() !== SECRET_PASSWORD).length;
+      const remaining = MAX_PASSWORD_ATTEMPTS - pg.attempts.length;
+      fb.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs sm:text-sm text-slate-800';
+      fb.textContent = remaining > 0
+        ? `Tebakan "${guess}" belum tepat (sisa ${remaining} percobaan). ${PASSWORD_CLUES[Math.min(PASSWORD_CLUES.length - 1, wrongCount - 1)]}`
+        : `Kesempatan 5 kali percobaan telah habis. Klik "Ulangi Permainan" untuk mencoba lagi.`;
+      fb.classList.remove('hidden');
+    });
+
+    function renderJournalNotes() {
+      const container = document.getElementById('journalNotesList');
+      if (!container) return;
+      if (appState.journalNotes.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500">Belum ada catatan di jurnal.</p>`;
+        return;
+      }
+      container.innerHTML = appState.journalNotes.map((n, idx) => `
+        <div class="p-4 rounded-2xl bg-white/90 border border-sky-200 flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <p class="text-xs sm:text-sm text-slate-800">${n.text}</p>
+            <span class="text-[11px] font-mono text-slate-400">${n.time || 'Catatan'}</span>
+          </div>
+          <button type="button" onclick="deleteJournalNote(${idx})" class="text-xs text-coral hover:underline shrink-0">Hapus</button>
+        </div>
+      `).join('');
+    }
+
+    function deleteJournalNote(idx) {
+      appState.journalNotes.splice(idx, 1);
+      saveAppState();
+      renderJournalNotes();
+    }
+
+    document.getElementById('journalNoteForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('journalNoteInput');
+      const val = (input ? input.value : '').trim();
+      if (!val) return;
+      appState.journalNotes.unshift({ id: `note-${Date.now()}`, text: val, time: 'Baru saja' });
+      input.value = '';
+      saveAppState();
+      renderJournalNotes();
+      showToast('Catatan ditambahkan ke Jurnal.');
+    });
+
+    function renderGlossary() {
+      document.getElementById('glossaryList').innerHTML = GLOSSARY_ITEMS.map((g) => `
+        <div class="p-4 rounded-2xl bg-white/90 border border-sky-200 space-y-1.5">
+          <h3 class="font-display font-bold text-base text-biolum">${g.term}</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${g.def}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderBadges() {
+      const grid = document.getElementById('badgesGrid');
+      if (!grid) return;
+      grid.innerHTML = BADGES_CATALOG.map((b) => {
+        const unlocked = b.check(appState);
+        return `
+          <div class="p-4 rounded-2xl bg-white/90 border ${unlocked ? 'border-emerald-300' : 'border-sky-200 opacity-65'} space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="${unlocked ? 'text-kelp font-bold' : 'text-slate-400'}">${unlocked ? 'TERBUKA' : 'TERKUNCI'}</span>
+              <i data-lucide="award" class="w-4 h-4 ${unlocked ? 'text-kelp' : 'text-slate-400'}"></i>
+            </div>
+            <h3 class="font-display font-bold text-base text-slate-900">${b.title}</h3>
+            <p class="text-xs text-slate-600">${b.desc}</p>
+          </div>
+        `;
+      }).join('');
+      safeRenderIcons();
+    }
+
+    function openSearchModal() {
+      const modal = document.getElementById('searchModal');
+      const input = document.getElementById('globalSearchInput');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      renderSearchResults('');
+      safeRenderIcons();
+      setTimeout(() => input && input.focus(), 40);
+    }
+
+    function closeSearchModal() {
+      const modal = document.getElementById('searchModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function renderSearchResults(query) {
+      const container = document.getElementById('globalSearchResults');
+      const q = (query || '').trim().toLowerCase();
+      const items = [];
+      CURRICULUM_CHAPTERS.forEach((chap) => chap.lessons.forEach((les) => items.push({
+        type: 'Materi', title: les.title, sub: chap.title,
+        action: () => { closeSearchModal(); navigateTo('kurikulum'); openLessonReader(chap.id, les.id); }
+      })));
+      THREATS_DATA.forEach((t) => items.push({
+        type: 'Ancaman', title: t.title, sub: t.summary,
+        action: () => { closeSearchModal(); navigateTo('ancaman'); openThreatModal(t.id); }
+      }));
+      GLOSSARY_ITEMS.forEach((g) => items.push({
+        type: 'Kamus', title: g.term, sub: g.def,
+        action: () => { closeSearchModal(); openProfileHub('kamus'); }
+      }));
+      const filtered = q ? items.filter((it) => `${it.title} ${it.sub} ${it.type}`.toLowerCase().includes(q)) : items.slice(0, 7);
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="p-4 text-xs text-slate-500">Tidak ada hasil untuk "${query}".</p>`;
+        return;
+      }
+      container.innerHTML = '';
+      filtered.forEach((it) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full text-left p-3 rounded-xl hover:bg-sky-50 transition flex items-start justify-between gap-3';
+        btn.innerHTML = `<div><p class="text-sm font-semibold text-slate-900">${it.title}</p><p class="text-xs text-slate-500 line-clamp-1">${it.sub}</p></div><span class="px-2 py-0.5 rounded bg-sky-100 text-biolum text-[10px] font-mono shrink-0">${it.type}</span>`;
+        btn.addEventListener('click', it.action);
+        container.appendChild(btn);
+      });
+    }
+
+    document.getElementById('globalSearchInput').addEventListener('input', (e) => renderSearchResults(e.target.value));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeSearchModal(); closeThreatModal(); }
+      else if (e.key === '/' && document.activeElement && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        openSearchModal();
+      }
+    });
+
+    (function initOceanCanvas() {
+      const canvas = document.getElementById('oceanCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      let width = 0, height = 0, particles = [];
+      function resizeCanvas() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        const count = Math.min(48, Math.max(18, Math.floor((width * height) / 36000)));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width, y: Math.random() * height,
+          r: 1 + Math.random() * 2.2, vy: 0.18 + Math.random() * 0.45, alpha: 0.12 + Math.random() * 0.35
+        }));
+      }
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        const grad = ctx.createRadialGradient(width * 0.5, height * 0.12, 20, width * 0.5, height * 0.5, Math.max(width, height) * 0.8);
+        grad.addColorStop(0, 'rgba(14, 165, 233, 0.11)');
+        grad.addColorStop(0.55, 'rgba(186, 230, 253, 0.18)');
+        grad.addColorStop(1, 'rgba(248, 251, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+        particles.forEach((p) => {
+          p.y -= p.vy;
+          if (p.y < -10) { p.y = height + 10; p.x = Math.random() * width; }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(2, 132, 199, ${p.alpha * 0.65})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateProfileUI();
+      renderChaptersOverview();
+      renderThreatsGrid();
+      evaluatePasswordStrength();
+      renderPhishingCase();
+      renderEscapeRooms();
+      renderDailyMissions();
+      renderQuizQuestion();
+      renderSecretPasswordGame();
+      renderJournalNotes();
+      renderGlossary();
+      updateNavHighlight('beranda');
+      safeRenderIcons();
+      if (!appState.nickname || appState.nickname.trim().length < 2) openGatepassModal(false);
+    });
+  </script>
+</body>
+</html>
